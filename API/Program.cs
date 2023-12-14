@@ -1,6 +1,8 @@
 using System.Runtime.CompilerServices;
+using API.Helpers;
 using Core.Interfaces;
 using Infraestructura.Datos;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,9 +21,9 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<ILugarRepositorio, LugarRepositorio>();
 builder.Services.AddScoped(typeof(IRepositorio<>), typeof(Repositorio<>));
+builder.Services.AddAutoMapper(typeof(MappingProfiles));
 
 var app = builder.Build();
-
 //Aplicar las nuevas migraciones al ejecutar la aplicación y alimentar la Base de Datos
 using(var scope = app.Services.CreateScope())
 {
@@ -51,6 +53,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseStaticFiles();
 
 app.UseAuthorization();
 
