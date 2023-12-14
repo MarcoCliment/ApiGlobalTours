@@ -7,6 +7,7 @@ using Core.Entidades;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Core.Interfaces;
+using Core.Especificaciones;
 
 namespace API.Controllers
 {
@@ -14,17 +15,22 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class LugaresController : ControllerBase
     {
-        private readonly ILugarRepositorio _repo;
+        private readonly IRepositorio<Lugar> _lugarRepo;
+        private readonly IRepositorio<Pais> _paisRepo;
+        private readonly IRepositorio<Categoria> _categoriaRepo;
 
-        public LugaresController(ILugarRepositorio repo)
+        public LugaresController(IRepositorio<Lugar> lugarRepo, IRepositorio<Pais> paisRepo, IRepositorio<Categoria> categoriaRepo)
         {
-            _repo = repo;    
+            _lugarRepo = lugarRepo;
+            _paisRepo = paisRepo;
+            _categoriaRepo = categoriaRepo;
         }
 
         [HttpGet]
         public async Task<ActionResult<List<Lugar>>> GetLugares() 
         {
-            var lugares = await _repo.GetLugaresAsync();
+            var espec = new LugaresConPaisCategoriaEspecificacion();
+            var lugares = await _lugarRepo.ObtenerTodosEspec(espec);
 
             return Ok(lugares);
         }
@@ -33,8 +39,20 @@ namespace API.Controllers
 
         public async Task<ActionResult<Lugar>> GetLugar(int id) 
         {
-            return await _repo.GetLugarAsync(id);
+            var espec = new LugaresConPaisCategoriaEspecificacion(id);
+            return await _lugarRepo.ObtenerEspec(espec);
         }
 
+        [HttpGet("paises")]
+        public async Task<ActionResult<List<Pais>>> GetPaises()
+        {
+            return Ok(await _paisRepo.ObtenerTodosAsync());
+        }
+
+        [HttpGet("categorias")]
+        public async Task<ActionResult<List<Categoria>>> GetCategorias()
+        {
+            return Ok(await _categoriaRepo.ObtenerTodosAsync());
+        }
     }
 }
